@@ -1,0 +1,8 @@
+# Dev and test tooling, used for local development and CI.
+# Not shipped in either container image.
+pytest
+pytest-cov
+hypothesis
+ruff
+mypy
+httpx
