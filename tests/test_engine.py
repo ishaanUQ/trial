@@ -5,6 +5,10 @@ cases for known behaviour, and a hypothesis property test that checks the
 engine agrees with Python's builtin sorted across many random inputs.
 """
 
+import math
+
+from hypothesis import given, strategies as st
+
 from app.engine.merge_sort import Counters, merge_sort
 
 
@@ -79,3 +83,36 @@ def test_counters_default_construction():
     c = Counters()
     assert c.comparisons == 0
     assert c.writes == 0
+
+
+@given(st.lists(st.integers()))
+def test_matches_builtin_sorted_integers(xs):
+    result, _ = merge_sort(xs)
+    assert result == sorted(xs)
+
+
+@given(st.lists(st.floats(allow_nan=False, allow_infinity=False)))
+def test_matches_builtin_sorted_floats(xs):
+    result, _ = merge_sort(xs)
+    assert result == sorted(xs)
+
+
+@given(st.lists(st.integers(), min_size=2))
+def test_comparison_upper_bound(xs):
+    _, c = merge_sort(xs)
+    n = len(xs)
+    assert c.comparisons <= n * math.ceil(math.log2(n))
+
+
+@given(st.lists(st.integers()))
+def test_writes_equal_length_times_levels_is_never_negative(xs):
+    result, c = merge_sort(xs)
+    assert len(result) == len(xs)
+    assert c.comparisons >= 0
+    assert c.writes >= 0
+
+
+@given(st.lists(st.integers()))
+def test_result_is_sorted_ascending(xs):
+    result, _ = merge_sort(xs)
+    assert all(result[i] <= result[i + 1] for i in range(len(result) - 1))
