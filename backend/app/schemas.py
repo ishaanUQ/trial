@@ -1,5 +1,12 @@
-# Pydantic request and response models.
-#
-# Placeholder module. Request validation is added in Issue 3
-# (feature/validation), per docs/DELIVERY_PLAN.md and the mergesort-backend
-# skill.
+"""Pydantic request models for the /sort endpoint.
+
+Validation lives here so a bad payload never reaches the engine. The engine
+trusts its input completely, so this module is where every edge case gets
+caught.
+"""
+
+from pydantic import BaseModel
+
+
+class SortRequest(BaseModel):
+    array: list[float]
