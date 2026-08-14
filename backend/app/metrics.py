@@ -10,6 +10,8 @@ that the engine got it right. If the engine ever regresses, this is the
 check that catches it before a broken result reaches the client.
 """
 
+import math
+
 from app.engine.merge_sort import Counters
 
 
@@ -29,6 +31,7 @@ def build_metrics(
     """
     n = len(original)
     is_sorted = all(result[i] <= result[i + 1] for i in range(len(result) - 1))
+    ref = n * math.log2(n) if n > 1 else 0.0
     return {
         "element_count": n,
         "comparisons": counters.comparisons,
@@ -40,4 +43,5 @@ def build_metrics(
         # n directly is a simple, honest estimate rather than a precise
         # accounting of every intermediate list the recursion allocates.
         "aux_space_estimate": n,
+        "reference_n_log_n": round(ref, 2),
     }
