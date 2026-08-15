@@ -3,12 +3,14 @@
 These exercise the live app through FastAPI's TestClient, hitting the
 actual HTTP layer (routing, request parsing, pydantic validation, response
 serialization) rather than calling engine or schema code directly. The
-happy paths for GET /health and POST /sort are covered here.
+happy paths for GET /health and POST /sort are covered here, along with
+every malformed-payload shape the running API should reject with a 422.
 """
 
 import math
 
 from app.main import app
+from app.schemas import MAX_LEN
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
@@ -86,3 +88,69 @@ def test_sort_empty_array_metrics_are_zeroed():
     assert metrics["is_sorted"] is True
     assert metrics["aux_space_estimate"] == 0
     assert metrics["reference_n_log_n"] == 0.0
+
+
+# --- POST /sort rejects malformed payloads (422) ------------------------
+
+
+def test_sort_rejects_missing_array_field():
+    r = client.post("/sort", json={})
+    assert r.status_code == 422
+    assert "detail" in r.json()
+
+
+def test_sort_rejects_non_numeric_entries():
+    r = client.post("/sort", json={"array": [1, "two", 3]})
+    assert r.status_code == 422
+    assert "detail" in r.json()
+
+
+def test_sort_rejects_boolean_entries():
+    r = client.post("/sort", json={"array": [1, True, 3]})
+    assert r.status_code == 422
+    assert "detail" in r.json()
+
+
+def test_sort_rejects_infinity():
+    # httpx's json= helper refuses to serialize non-finite floats at all
+    # (they are not valid JSON), so the raw wire bytes are sent directly
+    # with the literal Infinity token, which the server's own json parser
+    # accepts before pydantic's finiteness check rejects it.
+    r = client.post(
+        "/sort",
+        content=b'{"array": [1, Infinity, 3]}',
+        headers={"content-type": "application/json"},
+    )
+    assert r.status_code == 422
+    assert "detail" in r.json()
+
+
+def test_sort_rejects_nan_via_json_constant():
+    r = client.post(
+        "/sort",
+        content=b'{"array": [1, NaN, 3]}',
+        headers={"content-type": "application/json"},
+    )
+    assert r.status_code == 422
+    assert "detail" in r.json()
+
+
+def test_sort_rejects_over_length_array():
+    r = client.post("/sort", json={"array": [1.0] * (MAX_LEN + 1)})
+    assert r.status_code == 422
+    assert "detail" in r.json()
+
+
+def test_sort_rejects_wrong_top_level_type():
+    r = client.post("/sort", json=[1, 2, 3])
+    assert r.status_code == 422
+    assert "detail" in r.json()
+
+
+def test_sort_error_body_is_structured():
+    r = client.post("/sort", json={"array": ["a", "b"]})
+    detail = r.json()["detail"]
+    assert isinstance(detail, list)
+    assert len(detail) >= 1
+    assert "loc" in detail[0]
+    assert "msg" in detail[0]
