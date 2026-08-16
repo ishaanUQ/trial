@@ -1,4 +1,4 @@
-# Streamlit page: array input and sort button.
+# Streamlit page: array input, sort button, sorted output, metrics table.
 #
 # Issue 7 (feature/frontend-page): builds the static page and wires a basic
 # call to the backend's POST /sort endpoint. The backend URL is a simple
@@ -26,4 +26,20 @@ if st.button("Sort"):
         st.stop()
 
     data = resp.json()
-    st.write(data)
+
+    st.subheader("Sorted array")
+    st.write(data["result"])
+
+    st.subheader("Performance metrics")
+    m = data["metrics"]
+    st.table(
+        {
+            "Elements": m["element_count"],
+            "Comparisons": m["comparisons"],
+            "Writes": m["writes"],
+            "Time (ms)": m["time_ms"],
+            "n log n reference": m["reference_n_log_n"],
+            "Aux space (slots)": m["aux_space_estimate"],
+            "Verified sorted": m["is_sorted"],
+        }
+    )
