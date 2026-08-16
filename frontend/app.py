@@ -12,7 +12,12 @@ import streamlit as st
 
 BACKEND_URL = "http://localhost:8000"
 
+st.set_page_config(page_title="Merge Sort Demo", layout="centered")
 st.title("Merge Sort Demo")
+st.write(
+    "Enter an array of numbers, separated by commas or spaces. "
+    "The backend sorts it with merge sort and reports how the sort performed."
+)
 
 raw = st.text_area("Array", value="5, 3, 8, 1, 9, 2, 7", height=100)
 
