@@ -7,7 +7,9 @@
 # BACKEND_URL environment variable (matching the docker-ci-quality skill's
 # compose service env, so Issue 9 can wire this up without renaming
 # anything), and handles three failure modes explicitly: local parse
-# failure, backend unreachable, and backend validation rejection.
+# failure, backend unreachable, and backend validation rejection. Per the
+# streamlit-static-ui skill, the frontend still owns no sorting logic; the
+# backend is the sole authority on ordering and on validating the input.
 
 import os
 
@@ -42,9 +44,21 @@ if st.button("Sort"):
         st.error(f"Could not reach the backend at {BACKEND_URL}.")
         st.stop()
 
-    # Failure mode 3: the backend reached the request but rejected it.
+    # Failure mode 3: the backend reached the request but rejected it. The
+    # 422 body has the shape {"detail": [{"type", "loc", "msg"}, ...]}; pull
+    # out the human-readable msg for each entry rather than dumping the raw
+    # JSON at the user, so the actual reason for the rejection is visible.
     if resp.status_code == 422:
-        st.error("The backend rejected the input.")
+        try:
+            detail = resp.json().get("detail", [])
+        except ValueError:
+            detail = []
+        messages = [
+            entry.get("msg", str(entry)) if isinstance(entry, dict) else str(entry)
+            for entry in detail
+        ]
+        reason = "; ".join(messages) if messages else "The backend rejected the input."
+        st.error(f"The backend rejected the input: {reason}")
         st.stop()
 
     if resp.status_code != 200:
