@@ -1,16 +1,19 @@
 # Streamlit page: array input, sort button, sorted output, metrics table.
 #
-# Issue 7 (feature/frontend-page): builds the static page and wires a basic
-# call to the backend's POST /sort endpoint. The backend URL is a simple
-# module-level constant for now; reading it from an environment variable and
-# handling connection/parse/validation errors explicitly is Issue 8's job
-# (feature/frontend-integration), per docs/DELIVERY_PLAN.md and the
-# streamlit-static-ui skill.
+# Issue 7 (feature/frontend-page) built the static page and wired a basic
+# call to the backend's POST /sort endpoint using a hardcoded backend URL.
+#
+# Issue 8 (feature/frontend-integration): reads the backend URL from the
+# BACKEND_URL environment variable, matching the docker-ci-quality skill's
+# compose service env, so Issue 9 can wire this up without renaming
+# anything.
+
+import os
 
 import httpx
 import streamlit as st
 
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8000")
 
 st.set_page_config(page_title="Merge Sort Demo", layout="centered")
 st.title("Merge Sort Demo")
