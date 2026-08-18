@@ -7,9 +7,9 @@ engine agrees with Python's builtin sorted across many random inputs.
 
 import math
 
-from hypothesis import given, strategies as st
-
 from app.engine.merge_sort import Counters, merge_sort
+from hypothesis import given
+from hypothesis import strategies as st
 
 
 def test_empty():
