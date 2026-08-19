@@ -23,7 +23,26 @@ tests/      pytest suite (added with the backend tests)
 
 ## Setup
 
-TODO: filled in as part of documentation delivery (see `docs/DELIVERY_PLAN.md`, Issue 12).
+Requires Python 3.12. Clone the repo, then create and activate a virtual environment from the
+repo root:
+
+```bash
+git clone <repo-url>
+cd trial
+python3.12 -m venv .venv
+source .venv/bin/activate
+```
+
+Install the dev/test tooling plus both services' runtime dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+pip install -r backend/requirements.txt
+pip install -r frontend/requirements.txt
+```
+
+This gives you everything needed to run the app locally, run the test suite, and run ruff and
+mypy, without Docker.
 
 ## Running the app
 
