@@ -46,13 +46,71 @@ mypy, without Docker.
 
 ## Running the app
 
-TODO: local run and `docker compose up` instructions, filled in as part of documentation
-delivery (see `docs/DELIVERY_PLAN.md`, Issue 12).
+### With Docker Compose (recommended)
+
+From the repo root:
+
+```bash
+docker compose up --build
+```
+
+This builds and starts both services on a shared network. The frontend is available at
+[http://localhost:8501](http://localhost:8501) and the backend at
+[http://localhost:8000](http://localhost:8000) (try `GET /health`). Inside the compose network the
+frontend reaches the backend at `http://backend:8000`, set via the `BACKEND_URL` environment
+variable in `docker-compose.yml`, so no extra configuration is needed.
+
+### Running locally without Docker
+
+With the virtual environment from Setup active, start the backend from the `backend/` directory
+so `app.main:app` resolves correctly:
+
+```bash
+cd backend
+uvicorn app.main:app --reload --port 8000
+```
+
+In a separate terminal, start the frontend from the `frontend/` directory. Since there is no
+compose network to resolve the `backend` hostname, point it at localhost explicitly:
+
+```bash
+cd frontend
+BACKEND_URL=http://localhost:8000 streamlit run app.py
+```
+
+The frontend defaults to `http://localhost:8000` when `BACKEND_URL` is unset, so this step is
+optional if the backend is already running on the default port, but setting it explicitly is
+recommended for clarity.
 
 ## Testing
 
-TODO: how to run the pytest suite and coverage, filled in alongside the backend tests and
-documentation delivery.
+Run the full pytest suite with coverage from the repo root (the root `pyproject.toml` sets
+`pythonpath = ["backend"]` so `app.*` imports resolve without extra setup):
+
+```bash
+pytest tests --cov=app --cov-report=term-missing
+```
+
+The suite covers:
+
+- **Engine tests** (`tests/test_engine.py`): fixed merge sort cases, including empty arrays,
+  single elements, duplicates, and already-sorted or reverse-sorted input.
+- **Property-based tests** (via Hypothesis): generated arrays checked against invariants such as
+  "the output is sorted" and "the output is a permutation of the input", to catch edge cases
+  fixed examples would miss.
+- **Validation tests** (`tests/test_validation.py`): input schema edge cases, such as invalid or
+  malformed payloads.
+- **Metrics tests** (`tests/test_metrics.py`): comparison counts, write counts, and timing are
+  captured correctly.
+- **API tests** (`tests/test_api.py`): `GET /health` and `POST /sort` exercised through FastAPI's
+  `TestClient`.
+
+To run lint and type checks locally, matching what CI enforces:
+
+```bash
+ruff check .
+mypy backend/app
+```
 
 ## Development tooling
 
