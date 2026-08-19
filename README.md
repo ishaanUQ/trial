@@ -116,4 +116,12 @@ mypy backend/app
 
 Lint and type checking are configured in the root `pyproject.toml` (ruff and mypy). Dev and
 test dependencies live in `requirements-dev.txt`; runtime dependencies live in
-`backend/requirements.txt` and `frontend/requirements.txt`.
+`backend/requirements.txt` and `frontend/requirements.txt`. All three files pin minimum
+versions for the key libraries so a fresh install stays reproducible without locking out
+patch releases.
+
+## CI
+
+Every push and pull request to `main` runs lint, type check, and the full test suite with
+coverage (`.github/workflows/ci.yml`). A separate workflow builds both Docker images on every
+push to `main` (`.github/workflows/docker.yml`).
