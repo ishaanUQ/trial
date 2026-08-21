@@ -1,4 +1,4 @@
 # Frontend runtime dependencies for the Streamlit page.
-# Pin exact versions at install time to the current stable releases.
-streamlit
-httpx
+# Minimum versions are pinned for reproducibility while staying flexible on patch releases.
+streamlit>=1.37
+httpx>=0.27

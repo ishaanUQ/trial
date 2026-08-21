@@ -1,5 +1,5 @@
 # Backend runtime dependencies for the merge sort demo API.
-# Pin exact versions at install time to the current stable releases.
-fastapi
-uvicorn[standard]
-pydantic
+# Minimum versions are pinned for reproducibility while staying flexible on patch releases.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.8
