@@ -1,0 +1,4 @@
+# Frontend runtime dependencies for the Streamlit page.
+# Pin exact versions at install time to the current stable releases.
+streamlit
+httpx

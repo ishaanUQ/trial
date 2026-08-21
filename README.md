@@ -1,19 +1,42 @@
-# Merge Sort Demo: Build Scaffold
+# Merge Sort Demo
 
-This scaffold sets up a one-pass build of a small full-stack merge sort demo: a Streamlit page that sends an array to a FastAPI backend, which validates it, sorts it with merge sort, and returns the sorted array along with performance metrics. No animation, one page, one endpoint that matters.
+A small full-stack demo that sorts a user-supplied array with merge sort and reports how the
+sort performed: wall-clock time, comparisons made, element writes, and a verification that the
+result is actually sorted. Nothing is animated. The value is in the measured output.
 
-## What is in here
+## Architecture
 
-- docs/PROJECT_OVERVIEW.md: the full technical overview, architecture, and success criteria.
-- docs/PREFLIGHT.md: what you need running before the build starts.
-- docs/DELIVERY_PLAN.md: every issue, branch, pull request, merge, and commit, including the timeline.
-- ONESHOT_PROMPT.md: the prompt that starts the whole build.
-- .claude/skills: three skills carrying the reference code for backend, frontend, and delivery.
-- .claude/agents: three specialist subagents plus the orchestrator that runs everything.
-- scripts/backdate_commits.sh: the commit date helper.
+Two services talk over HTTP. The backend is a FastAPI application that owns the merge sort
+engine, input validation, and metric collection, exposing a health check and a single `/sort`
+endpoint. The frontend is a thin Streamlit page: the user enters an array as text, the page
+parses it, sends it to the backend, and renders the sorted result and metrics table it gets
+back. Docker Compose runs both services on a shared network, with the frontend reaching the
+backend by service name. See `docs/PROJECT_OVERVIEW.md` for the full technical overview.
 
-## How to use it
+## Project layout
 
-Read docs/PROJECT_OVERVIEW.md, work through docs/PREFLIGHT.md, then open ONESHOT_PROMPT.md and run it. The orchestrator does the rest, building the app and recording it through a normal issue and pull request process.
+```
+backend/    FastAPI app, merge sort engine, schemas, metrics
+frontend/   Streamlit page
+tests/      pytest suite (added with the backend tests)
+```
 
-The app itself, backend and frontend directories, is created during the build. This scaffold is the plan and the instructions that produce it.
+## Setup
+
+TODO: filled in as part of documentation delivery (see `docs/DELIVERY_PLAN.md`, Issue 12).
+
+## Running the app
+
+TODO: local run and `docker compose up` instructions, filled in as part of documentation
+delivery (see `docs/DELIVERY_PLAN.md`, Issue 12).
+
+## Testing
+
+TODO: how to run the pytest suite and coverage, filled in alongside the backend tests and
+documentation delivery.
+
+## Development tooling
+
+Lint and type checking are configured in the root `pyproject.toml` (ruff and mypy). Dev and
+test dependencies live in `requirements-dev.txt`; runtime dependencies live in
+`backend/requirements.txt` and `frontend/requirements.txt`.
